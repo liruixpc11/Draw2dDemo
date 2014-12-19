@@ -9,7 +9,6 @@ import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LineBorder;
 import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.ToolbarLayout;
-import org.eclipse.draw2d.geometry.Insets;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.graphics.Pattern;
 import org.eclipse.swt.widgets.Display;
@@ -21,30 +20,22 @@ public class PersonFigure extends RectangleFigure {
 		setPreferredSize(200, 100);
 		setBorder(new LineBorder(1));
 
-		add(new Label(name + " " + new SimpleDateFormat("yyyy-MM-dd").format(birthday)));
-		add(new Label(note) {
+		add(new Label(name + " "
+				+ new SimpleDateFormat("yyyy-MM-dd").format(birthday)));
 
-			@Override
-			public Insets getInsets() {
-				return new Insets(2, 0, 0, 0);
-			}
-
-			@Override
-			protected void paintBorder(Graphics graphics) {
-				Rectangle rectangle = getBounds();
-				graphics.drawLine(rectangle.x, rectangle.y, rectangle.x + rectangle.width, rectangle.y);
-			}
-		});
+		for (String n : note.split("\n")) {
+			add(new NoteFigure(n));
+		}
 	}
 
 	@Override
 	public void paintFigure(Graphics graphics) {
 		Rectangle rectangle = getBounds();
-		graphics.setBackgroundPattern(new Pattern(Display.getCurrent(), 
-				rectangle.x, rectangle.y, rectangle.x + rectangle.width, rectangle.y + rectangle.height, 
-				ColorConstants.white, ColorConstants.lightGray));
+		graphics.setBackgroundPattern(new Pattern(Display.getCurrent(),
+				rectangle.x, rectangle.y, rectangle.x + rectangle.width,
+				rectangle.y + rectangle.height, ColorConstants.white,
+				ColorConstants.lightGray));
 		graphics.fillRectangle(rectangle);
 	}
-	
-	
+
 }

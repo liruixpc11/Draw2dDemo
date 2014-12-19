@@ -68,7 +68,7 @@ public class GenealogyView {
 
 		IFigure previousFigure = null;
 		for (Object[] o : new Object[][] {
-				new Object[] {"Li Rui", new Point(10, 10), "note1"}, 
+				new Object[] {"Li Rui", new Point(10, 10), "note1\nadditional note"}, 
 				new Object[] {"Demo", new Point(200, 200), "note2"}
 				
 		}) {
