@@ -20,19 +20,25 @@ import org.eclipse.draw2d.LightweightSystem;
 import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.RectangleFigure;
+import org.eclipse.draw2d.ScalableFreeformLayeredPane;
 import org.eclipse.draw2d.ShortestPathConnectionRouter;
 import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Widget;
 
 public class GenealogyView {
-	private FreeformLayeredPane root;
+	private ScalableFreeformLayeredPane root;
 	private FreeformLayer primary;
 	private ConnectionLayer connections;
 
@@ -45,6 +51,8 @@ public class GenealogyView {
 		Canvas canvas = createCanvas(shell);
 		canvas.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
+		createMenuBar(shell);
+		
 		Display display = shell.getDisplay();
 		shell.open();
 		while (!shell.isDisposed()) {
@@ -54,8 +62,74 @@ public class GenealogyView {
 		}
 	}
 	
+	private void createMenuBar(Shell shell) {
+		final Menu menuBar = new Menu(shell, SWT.BAR);
+		shell.setMenuBar(menuBar);
+		
+		MenuItem zoomMenuItem = new MenuItem(menuBar, SWT.CASCADE);
+		zoomMenuItem.setText("Zoom");
+		Menu zoomMenu = new Menu(shell, SWT.DROP_DOWN);
+		zoomMenuItem.setMenu(zoomMenu);
+		
+		createFixedZoomMenuItem(zoomMenu, 0.5);
+		createFixedZoomMenuItem(zoomMenu, 1);
+		createFixedZoomMenuItem(zoomMenu, 2);
+		
+		createScaleToFitMenuItem(zoomMenu);
+	}
+	
+	private void createFixedZoomMenuItem(Menu menu, final double scale) {
+		String text = String.valueOf(((int) (scale * 100)));
+		
+		MenuItem menuItem = new MenuItem(menu, SWT.NULL);
+		menuItem.setText(text);
+		menuItem.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				root.setScale(scale);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+	}
+	
+	private void createScaleToFitMenuItem(Menu menu) {
+		MenuItem menuItem = new MenuItem(menu, SWT.NULL);
+		menuItem.setText("Scale to fit");
+		menuItem.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				scaleToFit();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				widgetSelected(arg0);
+			}
+		});
+	}
+	
+	private void scaleToFit() {
+		FreeformViewport viewport = (FreeformViewport) root.getParent();
+		Rectangle viewArea = viewport.getClientArea();
+		
+		root.setScale(1);
+		
+		Rectangle extent = root.getFreeformExtent().union(0, 0);
+		double wScale = ((double) viewArea.width) / extent.width;
+		double hScale = ((double) viewArea.height) / extent.height;
+		double newScale = Math.min(hScale, wScale);
+		
+		root.setScale(newScale);
+	}
+	
 	private Canvas createCanvas(Shell parent) {
-		root = new FreeformLayeredPane();
+		root = new ScalableFreeformLayeredPane();
 		root.setFont(parent.getFont());
 
 		drawContents();
